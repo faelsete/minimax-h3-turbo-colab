@@ -147,11 +147,11 @@ state = gen_pipe(
     height=HEIGHT,
     width=WIDTH,
     num_frames=num_frames,
-    steps=6,
-    seed=42,
+    num_inference_steps=6,
+    generator=torch.Generator("cpu").manual_seed(42),
 )
-frames1 = state.get("frames")
-audio1 = state.get("audio")
+frames1 = state.get("videos")[0]
+audio1 = state.get("audio")[0].cpu()
 sr1 = state.get("sampling_rate", 24000)
 
 path1 = "/content/take1.mp4"
@@ -174,11 +174,11 @@ state = gen_pipe(
     height=HEIGHT,
     width=WIDTH,
     num_frames=num_frames,
-    steps=6,
-    seed=43,
+    num_inference_steps=6,
+    generator=torch.Generator("cpu").manual_seed(43),
 )
-frames2 = state.get("frames")
-audio2 = state.get("audio")
+frames2 = state.get("videos")[0]
+audio2 = state.get("audio")[0].cpu()
 sr2 = state.get("sampling_rate", 24000)
 
 path2 = "/content/take2.mp4"
