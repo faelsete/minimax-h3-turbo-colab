@@ -61,7 +61,7 @@ model_ready = "/content/al_keyframe_768x1344.jpg"
 prepare_keyframe(model_src, model_ready)
 
 raw_user_prompt = (
-    "Cinematic vertical video 9:16. The breathtakingly gorgeous supermodel woman in black dress with luxurious fur stole walks slowly and smoothly forward towards the camera on a red carpet evening event, with gentle backward camera tracking. She maintains warm, confident eye contact with a captivating smile, speaking directly to the camera: 'Olá, boa noite! Que prazer imenso estar aqui com vocês nesta noite mágica!' Warm golden ambient lighting, cinematic bokeh background with evening lights, ultra-realistic 24fps motion, photorealistic skin texture."
+    "Cinematic vertical 9:16 video. The gorgeous supermodel woman in black evening gown and fur stole walks forward directly toward the camera, stepping closer and closer until her face fills the frame in an intimate, tight close-up shot right in front of the lens. Her expression is dynamic and lively: her lips immediately part and her mouth opens in active speech, her jaw and lips articulating each word expressively with visible teeth and lively lip sync as she speaks directly and warmly into the camera: 'Olá! Que prazer enorme estar bem pertinho de você esta noite!' The camera remains stationary in front of her as she approaches close to the lens. High-fashion glamour, cinematic lighting, photorealistic skin and hair."
 )
 
 num_frames = snap_frames(5) # 124 frames
@@ -89,14 +89,29 @@ try:
         max_new_tokens=1000
     )
     print(f"✅ Prompt reescrito com sucesso em {time.time()-t_rw:.1f}s!")
-    print("\n--- PROMPT ESTRUTURADO (CONTEXT-IR) ---")
-    print(refined_prompt)
-    print("---------------------------------------\n")
 except Exception as e:
     print(f"⚠️ Erro no rewrite ({e}), utilizando prompt com tags manuais...")
     refined_prompt = (
-        f"[Shot 1] The elegant supermodel woman in black gown and fur stole walks slowly and gracefully forward toward the camera on a red carpet at night. The camera tracks back slowly and steadily. She smiles warmly and speaks directly to the camera: <d>[Portuguese] Olá, boa noite! Que prazer imenso estar aqui com vocês nesta noite mágica.</d> Soft golden evening lighting, cinematic bokeh lights, 24fps realism."
+        f"[Shot 1] The elegant supermodel woman in black gown and fur stole walks forward directly toward the camera, stepping closer until her face fills the screen in a tight close-up. Her lips immediately part and her mouth moves actively with visible teeth and dynamic lip articulation as she speaks directly to the camera: <d>[Portuguese] Olá! Que prazer enorme estar bem pertinho de você esta noite!</d> Warm golden evening lighting, cinematic bokeh lights, 24fps realism."
     )
+
+# Garantir câmera estática para aproximação e lábios em movimento ativo
+refined_prompt = refined_prompt.replace("tracks backward with small amplitude at slow speed", "remains static as she steps closer into an intimate tight close-up")
+refined_prompt = refined_prompt.replace("tracks backward with small amplitude", "remains static as she steps closer into an intimate tight close-up")
+refined_prompt = refined_prompt.replace("tracks backward", "holds static while she walks directly toward the lens")
+refined_prompt = refined_prompt.replace("maintaining warm, confident eye contact with a captivating smile", "stepping forward into an intimate tight close-up, her lips parting and mouth opening with expressive speech articulation and visible teeth")
+refined_prompt = refined_prompt.replace("lips remain closed", "lips part and mouth articulates speech actively")
+refined_prompt = refined_prompt.replace("pose preserved from the image", "facial features and elegant attire preserved from the image while her pose develops into active forward movement and animated speech")
+
+if "<d>" in refined_prompt and "lips part" not in refined_prompt.lower():
+    refined_prompt = refined_prompt.replace(
+        "speaks directly to the camera:",
+        "her lips parting and mouth opening in active, expressive speech articulation with visible teeth as she speaks directly to the camera:"
+    )
+
+print("\n--- PROMPT ESTRUTURADO FINAL (CONTEXT-IR) ---")
+print(refined_prompt)
+print("---------------------------------------------\n")
 
 print("📝 Codificando embeddings com o prompt refinado...")
 t_enc = time.time()
