@@ -55,11 +55,11 @@ code = code.replace(old_encode, new_encode)
 # 4. Injetar autenticação HF_TOKEN no conditioner para liberar cota dedicada no ZeroGPU
 code = code.replace(
     '    return Client(CONDITIONER_SPACE)',
-    '    return Client(CONDITIONER_SPACE, hf_token=os.environ.get("HF_TOKEN"))'
+    '    return Client(CONDITIONER_SPACE, token=os.environ.get("HF_TOKEN"))'
 )
 code = code.replace(
     '    return Client(CONDITIONER_SPACE, headers={"x-ip-token": ip_token})',
-    '    return Client(CONDITIONER_SPACE, headers={"x-ip-token": ip_token}, hf_token=os.environ.get("HF_TOKEN"))'
+    '    return Client(CONDITIONER_SPACE, headers={"x-ip-token": ip_token}, token=os.environ.get("HF_TOKEN"))'
 )
 
 with open("app.py", "w", encoding="utf-8") as f:
