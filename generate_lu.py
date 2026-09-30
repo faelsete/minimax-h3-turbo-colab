@@ -64,17 +64,17 @@ print("\n" + "="*60)
 print("🎬 INICIANDO PRODUÇÃO AUTÔNOMA DA CAMPANHA: LÚ (SMART DIGITAL)")
 print("="*60)
 
-model_img = "/content/repo/assets/lu_model.jpg"
+model_img = "/content/lu_model.jpg"
 if not os.path.exists(model_img):
-    # fallback se não estiver na pasta do repo
-    fallback = "/content/Woman_in_business_attire_2K_20260930023453.jpg"
-    if os.path.exists(fallback):
-        model_img = fallback
+    model_img = "/content/repo/assets/lu_model.jpg"
+if not os.path.exists(model_img):
+    model_img = "/content/Woman_in_business_attire_2K_20260930023453.jpg"
 
 # -------------------------------------------------------------
 # TAKE 1: Apresentação (7 segundos · 9:16 Full)
 # -------------------------------------------------------------
-print("\n🎬 [1/3] Gerando Take 1 da Lú (Apresentação)...")
+print(f"\n📸 Modelo base confirmado: {model_img}")
+print("🎬 [1/3] Gerando Take 1 da Lú (Apresentação)...")
 prompt_take1 = (
     'Documentary 8k vertical video 9:16. Elegant professional blonde woman named Lú wearing a stylish charcoal grey blazer and silk blouse, facing camera directly, warm confident smile, natural eye contact. She speaks with perfect lip sync: "Oi, oi, pessoal! Eu sou a Lú, sou uma inteligência artificial criada pelo Rafael Fernandes da Smart Digital." Natural subtle speaking head tilt, lifelike facial expressions, smooth breathing movement. Soft natural studio window lighting, 24fps cinematic realism, clean video.'
 )
@@ -136,7 +136,7 @@ with open(concat_txt, "w") as f:
 subprocess.run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", concat_txt, "-c", "copy", "-movflags", "+faststart", final_video], check=True)
 print(f"\n🎉 VÍDEO FINAL DE 14 SEGUNDOS PRONTO: {final_video}")
 
-# Salvar cópia em /content/ e disparar download
+# Salvar cópia em /content/ e disparar download se em UI
 try:
     from google.colab import files
     print("📥 Disparando download automático para o seu computador...")
@@ -148,9 +148,13 @@ except Exception as e:
 # DESLIGAMENTO AUTOMÁTICO PARA POUPAR CRÉDITOS
 # -------------------------------------------------------------
 print("\n🛑 Produção finalizada com sucesso absoluto!")
-print("🛑 Desconectando e encerrando a máquina A100 do Colab para economizar seus créditos...")
-try:
-    from google.colab import runtime
-    runtime.unassign()
-except Exception as e:
-    print(f"Aviso desligamento: {e}")
+if os.environ.get("COLAB_CLI_RUN"):
+    print("⏳ Modo Colab-CLI ativo: mantendo VM viva para o download local...", flush=True)
+else:
+    print("🛑 Desconectando e encerrando a máquina A100 do Colab para economizar seus créditos...")
+    try:
+        from google.colab import runtime
+        runtime.unassign()
+    except Exception as e:
+        print(f"Aviso desligamento: {e}")
+
