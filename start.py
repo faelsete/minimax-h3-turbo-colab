@@ -8,9 +8,9 @@ os.system("git checkout app.py 2>/dev/null || true")
 with open("app.py", "r") as f:
     code = f.read()
 
-# 1. Configurar launch com link público (share=True)
+# 1. Configurar launch com link público (share=True) e permissão de arquivos
 code = code.replace("app.launch(show_error=True, allowed_paths=[OUTPUT_DIR])", "")
-code = code.replace("server_port=7860)", "server_port=7860, share=True)")
+code = code.replace("server_port=7860)", "server_port=7860, share=True, allowed_paths=[OUTPUT_DIR])")
 
 # 2. Injetar a quantização 8-bit do torchao logo após a fusão do LoRA com identação exata
 target = "        pipe.transformer.set_attention_backend(ATTENTION)"
