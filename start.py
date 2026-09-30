@@ -5,6 +5,13 @@ print("⚙️ Preparando MiniMax-H3 com otimizações para GPU A100...")
 os.chdir("/content/minimax-h3")
 os.system("git checkout app.py 2>/dev/null || true")
 
+hf_token = os.environ.get("HF_TOKEN", "")
+if not hf_token:
+    token_path = os.path.expanduser("~/.cache/huggingface/token")
+    if os.path.exists(token_path):
+        with open(token_path) as tf:
+            hf_token = tf.read().strip()
+
 with open("app.py", "r", encoding="utf-8") as f:
     code = f.read()
 
@@ -45,13 +52,24 @@ new_encode = """encode_video(frames, fps=FPS, output_path=path, audio=audio, aud
 
 code = code.replace(old_encode, new_encode)
 
+# 4. Injetar autenticação HF_TOKEN no conditioner para liberar cota dedicada no ZeroGPU
+code = code.replace(
+    '    return Client(CONDITIONER_SPACE)',
+    '    return Client(CONDITIONER_SPACE, hf_token=os.environ.get("HF_TOKEN"))'
+)
+code = code.replace(
+    '    return Client(CONDITIONER_SPACE, headers={"x-ip-token": ip_token})',
+    '    return Client(CONDITIONER_SPACE, headers={"x-ip-token": ip_token}, hf_token=os.environ.get("HF_TOKEN"))'
+)
+
 with open("app.py", "w", encoding="utf-8") as f:
     f.write(code)
+
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+os.environ["H3_PLACEMENT"] = "offload"
 
 print("🚀 Carregando modelos em 8-bit e iniciando o MiniMax-H3 Studio...")
 print("👉 Como os pesos já estão em cache no disco, o carregamento levará cerca de 1 minuto.")
 print("👉 Clique no link público 'Running on public URL: https://....gradio.live' que vai surgir abaixo:\n", flush=True)
 
-os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
-os.environ["H3_PLACEMENT"] = "offload"
-os.system("export PYTORCH_CUDA_ALLOC_CONF='expandable_segments:True' && export H3_PLACEMENT='offload' && python3 app.py")
+os.system(f"export HF_TOKEN='{hf_token}' && export PYTORCH_CUDA_ALLOC_CONF='expandable_segments:True' && export H3_PLACEMENT='offload' && python3 app.py")
